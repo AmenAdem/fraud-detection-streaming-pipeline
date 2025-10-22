@@ -125,3 +125,5 @@ docker-compose.override.yml
 $RECYCLE.BIN/
 .Trash-*/
 
+temp_auto_push.bat
+temp_interactive_push.bat
