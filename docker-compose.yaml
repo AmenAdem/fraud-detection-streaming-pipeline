@@ -1,0 +1,117 @@
+services:
+  # zookeeper:
+  #   image: bitnami/zookeeper:latest
+  #   environment:
+  #     - ALLOW_ANONYMOUS_LOGIN=yes
+
+  kafka:
+    image: bitnami/kafka:latest
+    container_name: kafka
+    ports:
+      - "9092:9092"
+    environment:
+      # ---- KRaft required ----
+      KAFKA_CFG_NODE_ID: 1
+      KAFKA_CFG_PROCESS_ROLES: broker,controller
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+
+      # ---- Listeners ----
+      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+
+      # ---- Other useful settings ----
+      ALLOW_PLAINTEXT_LISTENER: "yes"   # dev only!
+
+      # KRaft cluster ID: generate once with:
+      #   docker run --rm bitnami/kafka kafka-storage.sh random-uuid
+      KAFKA_KRAFT_CLUSTER_ID: "abcdefghijklmnopqrstuv"
+    volumes:
+      - kafka_data:/bitnami/kafka
+    networks:
+      - flink-net
+
+  jobmanager:
+    image: flink:1.19-scala_2.12
+    command: jobmanager
+    environment:
+      - JOB_MANAGER_RPC_ADDRESS=jobmanager
+    ports:
+      - "8081:8081"        # Flink Web UI
+    networks:
+      - flink-net
+
+  taskmanager:
+    image: flink:1.19-scala_2.12
+    command: taskmanager
+    depends_on:
+      - jobmanager
+    environment:
+      - JOB_MANAGER_RPC_ADDRESS=jobmanager
+    networks:
+      - flink-net
+
+  kafka-tools:
+    image: bitnami/kafka:latest
+    container_name: kafka-tools
+    depends_on:
+      - kafka
+    entrypoint: >
+      bash -c "
+        # Wait for Kafka to be ready
+        echo 'Waiting for Kafka to be ready...'
+        until kafka-topics.sh --bootstrap-server kafka:9092 --list; do
+          echo 'Kafka not ready yet, waiting...'
+          sleep 2
+        done
+        
+        # Create topics
+        echo 'Creating Kafka topics...'
+        kafka-topics.sh --bootstrap-server kafka:9092 --create --topic transactions --partitions 3 --replication-factor 1 --if-not-exists
+        kafka-topics.sh --bootstrap-server kafka:9092 --create --topic fraud-alerts --partitions 3 --replication-factor 1 --if-not-exists
+        
+        echo 'Topics created successfully!'
+        echo 'Available topics:'
+        kafka-topics.sh --bootstrap-server kafka:9092 --list
+        
+        echo 'Kafka tools container completed successfully'
+        exit 0
+      "
+    networks:
+      - flink-net
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    depends_on:
+      - kafka
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+    networks:
+      - flink-net
+
+  producer:
+    build:
+      context: ./producer/backend-producer
+    container_name: producer
+    depends_on:
+      - kafka
+      - kafka-tools
+    env_file:
+      - ./producer/backend-producer/.env
+    ports:
+      - "3000:3000"
+    networks:
+      - flink-net
+
+volumes:
+  kafka_data:
+
+networks:
+  flink-net:
+    driver: bridge

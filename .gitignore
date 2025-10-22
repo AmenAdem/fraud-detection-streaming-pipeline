@@ -1,0 +1,127 @@
+# General OS junk
+.DS_Store
+Thumbs.db
+Icon?
+ehthumbs.db
+*.swp
+*.swo
+*.tmp
+*.temp
+*.local
+
+# Logs
+logs/
+*.log
+log/
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Environment files (keep examples)
+.env
+.env.*
+!.env.example
+!.env.sample
+
+# Editor/IDE
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+*.iml
+*.ipr
+*.iws
+*.sublime-*
+*.code-workspace
+
+# Node / TypeScript / NestJS
+node_modules/
+dist/
+build/
+coverage/
+.nyc_output/
+.eslintcache
+.stylelintcache
+.turbo/
+.cache/
+.parcel-cache/
+.jest/
+.swc/
+.esbuild/
+*.tsbuildinfo
+storybook-static/
+.tmp/
+temp/
+# Package manager logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Java / JVM
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+hs_err_pid*
+replay_pid*
+
+# Maven
+.target/
+target/
+.mvn/timing.properties
+# Keep Maven wrapper scripts and JAR tracked
+!mvnw
+!mvnw.cmd
+!.mvn/wrapper/maven-wrapper.jar
+
+# Gradle (in case any module uses it)
+.gradle/
+**/build/
+# Keep Gradle wrapper tracked
+!gradlew
+!gradlew.bat
+!gradle/wrapper/gradle-wrapper.jar
+
+# Eclipse
+.project
+.classpath
+.settings/
+.factorypath
+.springBeans
+.recommenders
+
+# NetBeans
+nbproject/private/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+# IntelliJ (redundant if .idea/ ignored, but explicit caches just in case)
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/usage.statistics.xml
+.idea/**/dictionaries
+.idea/**/shelf
+.idea/**/libraries
+.idea/**/caches
+
+# Output folders (defensive)
+out/
+bin/
+
+# Docker (optional local files)
+.docker/
+docker-data/
+docker-compose.override.yml
+
+# OS-specific trash
+$RECYCLE.BIN/
+.Trash-*/
+
